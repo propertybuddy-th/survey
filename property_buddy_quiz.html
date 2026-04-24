@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>แบบทดสอบไลฟ์สไตล์ — Property Buddy</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --orange: #F97316;
+    --orange-dark: #EA6005;
+    --orange-light: #FFF7ED;
+    --orange-border: #FED7AA;
+    --amber: #FBBF24;
+    --text: #1C1917;
+    --text-muted: #78716C;
+    --text-hint: #A8A29E;
+    --bg: #FFFBF7;
+    --surface: #FFFFFF;
+    --border: #E7E5E4;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Prompt', sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo-mark {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, #F97316, #FBBF24);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .logo-text { line-height: 1.2; }
+  .logo-text .brand { font-size: 13px; font-weight: 600; color: var(--text); }
+  .logo-text .tagline { font-size: 10px; color: var(--text-muted); }
+
+  /* ── Progress ── */
+  .progress-wrap { padding: 16px 20px 0; }
+  .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .progress-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+  .progress-pct { font-size: 11px; color: var(--orange); font-weight: 600; }
+  .progress-bg { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 5px; background: linear-gradient(90deg, #F97316, #FBBF24); border-radius: 3px; transition: width 0.45s cubic-bezier(.4,0,.2,1); }
+
+  /* ── Main ── */
+  .main { padding: 20px 20px 100px; max-width: 540px; margin: 0 auto; }
+
+  .question-block { animation: fadeUp 0.3s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  .q-category {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 500; color: var(--orange);
+    background: var(--orange-light); border: 1px solid var(--orange-border);
+    padding: 3px 10px; border-radius: 20px; margin-bottom: 10px;
+  }
+  .q-text {
+    font-size: 17px; font-weight: 600; color: var(--text);
+    line-height: 1.55; margin-bottom: 6px;
+  }
+  .q-sub {
+    font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.6;
+  }
+
+  /* ── Options ── */
+  .opts { display: flex; flex-direction: column; gap: 9px; }
+  .opts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+
+  .opt {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 13px 14px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 11px;
+    font-size: 14px; color: var(--text);
+    transition: border-color .15s, background .15s, transform .1s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .opt:active { transform: scale(0.98); }
+  .opt.selected {
+    border-color: var(--orange);
+    background: var(--orange-light);
+    color: #7C2D12;
+  }
+
+  .opt-radio {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .15s, background .15s;
+  }
+  .opt.selected .opt-radio {
+    border-color: var(--orange);
+    background: var(--orange);
+  }
+  .opt.selected .opt-radio::after {
+    content: ''; width: 7px; height: 7px; border-radius: 50%; background: #fff;
+  }
+
+  .opt-check-box {
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: transparent;
+    transition: border-color .15s, background .15s;
+  }
+  .opt.selected .opt-check-box {
+    border-color: var(--orange);
+    background: var(--orange);
+    color: #fff;
+  }
+
+  .opt-label { line-height: 1.4; }
+
+  /* ── Nav bar ── */
+  .nav-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex; gap: 10px;
+    max-width: 540px; margin: 0 auto;
+  }
+  .btn-back {
+    padding: 13px 20px; border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    background: transparent; color: var(--text-muted);
+    font-family: 'Prompt', sans-serif; font-size: 14px;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .btn-next {
+    flex: 1; padding: 13px; border-radius: var(--radius);
+    border: none; background: var(--orange);
+    color: #fff; font-family: 'Prompt', sans-serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background .15s, opacity .15s;
+  }
+  .btn-next:disabled { opacity: 0.35; cursor: default; }
+  .btn-next:not(:disabled):active { background: var(--orange-dark); }
+
+  /* ── Intro screen ── */
+  .intro { text-align: center; padding: 32px 0 20px; animation: fadeUp 0.4s ease; }
+  .intro-icon { font-size: 48px; margin-bottom: 16px; }
+  .intro h1 { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
+  .intro p { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 20px; }
+  .intro-chips { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+  .chip { font-size: 12px; padding: 5px 12px; border-radius: 20px; background: var(--orange-light); color: #7C2D12; border: 1px solid var(--orange-border); }
+  .btn-start {
+    width: 100%; padding: 15px; border-radius: var(--radius);
+    border: none; background: linear-gradient(135deg, #F97316, #FBBF24);
+    color: #fff; font-family: 'Prompt', sans-serif;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(249,115,22,0.35);
+  }
+
+  /* ── Result ── */
+  .result { animation: fadeUp 0.4s ease; }
+  .result-hero { text-align: center; padding: 24px 0 20px; }
+  .result-hero .icon { font-size: 40px; margin-bottom: 10px; }
+  .result-hero h2 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .result-hero p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  .result-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+  }
+  .result-card-title {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px;
+  }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: 12px; padding: 4px 11px; border-radius: 20px; font-weight: 500; }
+  .tag-orange { background: var(--orange-light); color: #7C2D12; border: 1px solid var(--orange-border); }
+  .tag-blue { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+  .tag-teal { background: #F0FDF4; color: #14532D; border: 1px solid #BBF7D0; }
+
+  .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .score-item label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px; }
+  .score-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .score-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #F97316, #FBBF24); }
+
+  .cta-card {
+    background: linear-gradient(135deg, #F97316 0%, #FBBF24 100%);
+    border-radius: var(--radius); padding: 18px; margin-bottom: 12px;
+    text-align: center;
+  }
+  .cta-card h3 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .cta-card p { font-size: 12px; color: rgba(255,255,255,0.85); margin-bottom: 14px; line-height: 1.6; }
+  .btn-line {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #06C755; color: #fff;
+    padding: 11px 24px; border-radius: var(--radius-sm);
+    font-family: 'Prompt', sans-serif; font-size: 14px; font-weight: 600;
+    text-decoration: none; border: none; cursor: pointer;
+  }
+  .btn-restart {
+    width: 100%; padding: 13px; border-radius: var(--radius);
+    border: 1.5px solid var(--border); background: transparent;
+    color: var(--text-muted); font-family: 'Prompt', sans-serif;
+    font-size: 14px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-mark">🏠</div>
+  <div class="logo-text">
+    <div class="brand">Property Buddy</div>
+    <div class="tagline">แบบทดสอบไลฟ์สไตล์</div>
+  </div>
+</div>
+
+<div class="progress-wrap" id="progress-wrap" style="display:none">
+  <div class="progress-meta">
+    <span class="progress-label" id="prog-label">ข้อ 1 จาก 10</span>
+    <span class="progress-pct" id="prog-pct">10%</span>
+  </div>
+  <div class="progress-bg"><div class="progress-fill" id="prog-fill" style="width:10%"></div></div>
+</div>
+
+<div class="main" id="main"></div>
+
+<div class="nav-bar" id="nav-bar" style="display:none">
+  <button class="btn-back" id="btn-back" onclick="goBack()">← ย้อนกลับ</button>
+  <button class="btn-next" id="btn-next" onclick="goNext()" disabled>ถัดไป →</button>
+</div>
+
+<script>
+const Q = [
+  {
+    id:1, cat:"มหาวิทยาลัย",
+    text:"น้องเรียนคณะอะไร / โซนไหนของ ม.?",
+    sub:"ใช้จับคู่หอตามระยะเดินถึงคณะจริงๆ",
+    type:"single",
+    opts:[
+      {l:"บัญชี / เชียงราก 1", t:"near_cr1"},
+      {l:"แพทย์ / สถาปัตย์ / เชียงราก 2", t:"near_cr2"},
+      {l:"นิติศาสตร์ / รัฐศาสตร์", t:"near_law"},
+      {l:"วิศวกรรมศาสตร์", t:"near_eng"},
+      {l:"สังคมสงเคราะห์ / สังคมวิทยา", t:"near_soc"},
+      {l:"คณะอื่น / ยังไม่แน่ใจ", t:"near_other"},
+    ]
+  },
+  {
+    id:2, cat:"งบประมาณ",
+    text:"งบค่าเช่าต่อเดือนของน้องอยู่ที่เท่าไหร่?",
+    sub:"รวมค่าไฟ ค่าน้ำ และค่าใช้จ่ายอื่นๆ ไว้ด้วย",
+    type:"single",
+    opts:[
+      {l:"ไม่เกิน 4,000 บาท", t:"budget_low"},
+      {l:"4,000 – 6,000 บาท", t:"budget_mid"},
+      {l:"6,000 – 9,000 บาท", t:"budget_high"},
+      {l:"9,000 บาทขึ้นไป", t:"budget_premium"},
+    ]
+  },
+  {
+    id:3, cat:"ไลฟ์สไตล์กลางคืน",
+    text:"น้องใช้ชีวิตกลางคืนยังไง?",
+    sub:"ตอบตามความเป็นจริง ไม่มีถูก-ผิด",
+    type:"single",
+    opts:[
+      {l:"กลับหอก่อน 4 ทุ่มเป็นประจำ", t:"lifestyle_early"},
+      {l:"บางวันกลับดึก บางวันเช้า", t:"lifestyle_mixed"},
+      {l:"ออกไปข้างนอกหรือกลับดึกบ่อย", t:"lifestyle_night"},
+      {l:"ติว / ทำงานถึงดึกในหอ", t:"lifestyle_studylate"},
+    ]
+  },
+  {
+    id:4, cat:"ความเงียบสงบ",
+    text:"ความเงียบสงบสำคัญกับน้องแค่ไหน?",
+    sub:"ใช้ match กับคะแนน noise ของแต่ละหอ",
+    type:"single",
+    opts:[
+      {l:"สำคัญมาก — ต้องเงียบเพื่อนอน/ติว", t:"noise_high"},
+      {l:"พอรับได้ — ถ้าไม่ดังเกินไป", t:"noise_mid"},
+      {l:"ไม่ค่อยสำคัญ — ใส่หูฟังแก้ได้", t:"noise_low"},
+    ]
+  },
+  {
+    id:5, cat:"ความปลอดภัย",
+    text:"ระบบความปลอดภัยที่ต้องการมีอะไรบ้าง?",
+    sub:"เลือกได้หลายข้อ",
+    type:"check",
+    opts:[
+      {l:"กล้องวงจรปิดทั่วอาคาร", t:"sec_cctv"},
+      {l:"รปภ. ตลอด 24 ชม.", t:"sec_guard"},
+      {l:"ระบบคีย์การ์ด / สแกนนิ้ว", t:"sec_keycard"},
+      {l:"หอหญิงแยกเฉพาะ", t:"sec_female"},
+      {l:"ไม่มีข้อกำหนดพิเศษ", t:"sec_none"},
+    ]
+  },
+  {
+    id:6, cat:"การเดินทาง",
+    text:"น้องจะเดินทางไปมหาวิทยาลัยด้วยวิธีไหน?",
+    sub:"ตอบตามแผนหลัก",
+    type:"single",
+    opts:[
+      {l:"เดินเท้า / ปั่นจักรยาน", t:"transport_walk"},
+      {l:"มอเตอร์ไซค์ส่วนตัว", t:"transport_moto"},
+      {l:"รถยนต์ส่วนตัว", t:"transport_car"},
+      {l:"รถสองแถว / วินมอ'ไซค์ / Grab", t:"transport_public"},
+    ]
+  },
+  {
+    id:7, cat:"อาหารใกล้หอ",
+    text:"น้องให้ความสำคัญกับอาหารรอบหอแค่ไหน?",
+    sub:"ใช้ match กับคะแนน food quality ของแต่ละหอ",
+    type:"single",
+    opts:[
+      {l:"สำคัญมาก — ต้องมีหลายตัวเลือก เปิดดึก", t:"food_high"},
+      {l:"ปานกลาง — มีกินได้ก็พอ", t:"food_mid"},
+      {l:"ไม่สำคัญ — สต็อกหรือสั่ง Grab ได้", t:"food_low"},
+    ]
+  },
+  {
+    id:8, cat:"สิ่งอำนวยความสะดวก",
+    text:"สิ่งอำนวยความสะดวกที่ต้องการในหอ?",
+    sub:"เลือกได้หลายข้อ",
+    type:"check",
+    opts:[
+      {l:"ฟิตเนส", t:"amen_gym"},
+      {l:"สระว่ายน้ำ", t:"amen_pool"},
+      {l:"ห้องอ่านหนังสือ", t:"amen_study"},
+      {l:"เครื่องซักผ้าในหอ", t:"amen_laundry"},
+      {l:"ที่จอดรถเพียงพอ", t:"amen_parking"},
+      {l:"ร้านสะดวกซื้อใกล้หอ", t:"amen_store"},
+    ]
+  },
+  {
+    id:9, cat:"ลำดับความสำคัญ",
+    text:"น้องให้ความสำคัญกับอะไรมากกว่ากัน?",
+    sub:"เลือกอันที่ตรงกับตัวเองที่สุด",
+    type:"single",
+    opts:[
+      {l:"ราคาสมเหตุสมผล ประหยัดที่สุด", t:"priority_budget"},
+      {l:"ความสะดวกสบาย แม้จ่ายเพิ่มนิดหน่อย", t:"priority_comfort"},
+      {l:"ทำเล ใกล้คณะ / ใกล้ของกิน", t:"priority_location"},
+      {l:"ความเป็นส่วนตัว เงียบสงบ", t:"priority_privacy"},
+    ]
+  },
+  {
+    id:10, cat:"เงื่อนไขพิเศษ",
+    text:"มีเงื่อนไขพิเศษที่ต้องการไหม?",
+    sub:"เลือกได้หลายข้อ — ถ้าไม่มีเลือก 'ไม่มี'",
+    type:"check",
+    opts:[
+      {l:"อยากเลี้ยงสัตว์ในหอได้", t:"special_pet"},
+      {l:"ต้องการครัว / ทำอาหารได้", t:"special_kitchen"},
+      {l:"อยู่กับเพื่อน / คู่ (ห้องแฝด)", t:"special_couple"},
+      {l:"ต้องการสัญญารายปี (ต่างจังหวัด)", t:"special_annual"},
+      {l:"ไม่มีเงื่อนไขพิเศษ", t:"special_none"},
+    ]
+  }
+];
+
+let cur = -1; // -1 = intro
+let ans = {};
+
+function updateProgress() {
+  if (cur < 0) { document.getElementById('progress-wrap').style.display='none'; return; }
+  document.getElementById('progress-wrap').style.display='block';
+  const pct = Math.round(((cur+1)/Q.length)*100);
+  document.getElementById('prog-label').textContent = `ข้อ ${cur+1} จาก ${Q.length}`;
+  document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('prog-fill').style.width = pct+'%';
+}
+
+function updateNav() {
+  const nb = document.getElementById('nav-bar');
+  const bb = document.getElementById('btn-back');
+  const bn = document.getElementById('btn-next');
+  if (cur < 0) { nb.style.display='none'; return; }
+  nb.style.display='flex';
+  bb.style.display = cur > 0 ? 'block' : 'none';
+  const q = Q[cur];
+  const hasAns = q.type==='single' ? ans[q.id]!==undefined : (ans[q.id]&&ans[q.id].length>0);
+  bn.disabled = !hasAns;
+  bn.textContent = cur===Q.length-1 ? 'ดูผล ✨' : 'ถัดไป →';
+}
+
+function showIntro() {
+  document.getElementById('main').innerHTML = `
+    <div class="intro">
+      <div class="intro-icon">🏠</div>
+      <h1>หาหอที่ใช่<br>ใน 3 นาที</h1>
+      <p>ตอบ 10 ข้อ แล้วรับ Profile ไลฟ์สไตล์<br>ที่ Budder จะใช้ match หอพักให้น้องโดยเฉพาะ</p>
+      <div class="intro-chips">
+        <span class="chip">✓ ข้อมูลจากรุ่นพี่จริงๆ</span>
+        <span class="chip">✓ ตรงไลฟ์สไตล์</span>
+        <span class="chip">✓ ฟรี ไม่มีค่าใช้จ่าย</span>
+      </div>
+      <button class="btn-start" onclick="startQuiz()">เริ่มทำแบบทดสอบ →</button>
+    </div>`;
+  document.getElementById('nav-bar').style.display='none';
+  document.getElementById('progress-wrap').style.display='none';
+}
+
+function startQuiz() { cur=0; renderQ(); }
+
+function renderQ() {
+  updateProgress(); updateNav();
+  const q = Q[cur];
+  let optsHTML = '';
+
+  if (q.type==='single') {
+    optsHTML = `<div class="opts">`+q.opts.map((o,i)=>{
+      const sel = ans[q.id]===i;
+      return `<div class="opt${sel?' selected':''}" onclick="pickSingle(${q.id},${i})">
+        <div class="opt-radio"></div>
+        <span class="opt-label">${o.l}</span>
+      </div>`;
+    }).join('')+`</div>`;
+  } else {
+    optsHTML = `<div class="opts-grid">`+q.opts.map((o,i)=>{
+      const sel = ans[q.id]&&ans[q.id].includes(i);
+      return `<div class="opt${sel?' selected':''}" onclick="toggleCheck(${q.id},${i})">
+        <div class="opt-check-box">${sel?'✓':''}</div>
+        <span class="opt-label">${o.l}</span>
+      </div>`;
+    }).join('')+`</div>`;
+  }
+
+  document.getElementById('main').innerHTML = `
+    <div class="question-block">
+      <div class="q-category">${q.cat}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-sub">${q.sub}</div>
+      ${optsHTML}
+    </div>`;
+}
+
+function pickSingle(qid,idx) {
+  ans[qid]=idx;
+  document.querySelectorAll('.opt').forEach((el,i)=>{
+    el.classList.toggle('selected', i===idx);
+  });
+  document.getElementById('btn-next').disabled=false;
+}
+
+function toggleCheck(qid,idx) {
+  if(!ans[qid]) ans[qid]=[];
+  const pos=ans[qid].indexOf(idx);
+  if(pos>-1) ans[qid].splice(pos,1); else ans[qid].push(idx);
+  renderQ();
+}
+
+function goNext() {
+  if(cur<Q.length-1){cur++;renderQ();}
+  else showResult();
+}
+
+function goBack() {
+  if(cur>0){cur--;renderQ();}
+  else{cur=-1;showIntro();}
+}
+
+function showResult() {
+  document.getElementById('progress-wrap').style.display='none';
+  document.getElementById('nav-bar').style.display='none';
+
+  const tags=[];
+  Q.forEach(q=>{
+    if(ans[q.id]===undefined&&!(ans[q.id]?.length)) return;
+    if(q.type==='single'&&ans[q.id]!==undefined) tags.push(q.opts[ans[q.id]].t);
+    else if(ans[q.id]) ans[q.id].forEach(i=>tags.push(q.opts[i].t));
+  });
+
+  const lifeTags=[];
+  if(tags.includes('lifestyle_night')) lifeTags.push('คนกลับดึก');
+  if(tags.includes('lifestyle_early')) lifeTags.push('นอนเช้า');
+  if(tags.includes('lifestyle_studylate')) lifeTags.push('ติวดึก');
+  if(tags.includes('lifestyle_mixed')) lifeTags.push('ไลฟ์สไตล์ยืดหยุ่น');
+  if(tags.includes('noise_high')) lifeTags.push('ต้องการความเงียบสูง');
+  if(tags.includes('sec_female')) lifeTags.push('หอหญิงแยก');
+  if(tags.includes('priority_budget')) lifeTags.push('สายประหยัด');
+  if(tags.includes('priority_comfort')) lifeTags.push('ชอบความสะดวกสบาย');
+  if(tags.includes('priority_privacy')) lifeTags.push('ต้องการความส่วนตัว');
+  if(tags.includes('special_pet')) lifeTags.push('เลี้ยงสัตว์');
+  if(tags.includes('special_kitchen')) lifeTags.push('ต้องการครัว');
+
+  const budget = tags.includes('budget_low')?'ไม่เกิน 4,000 บาท':
+    tags.includes('budget_mid')?'4,000 – 6,000 บาท':
+    tags.includes('budget_high')?'6,000 – 9,000 บาท':'9,000+ บาท';
+
+  const sc=[
+    {l:'งบประมาณ', v:tags.includes('budget_low')?35:tags.includes('budget_mid')?60:tags.includes('budget_high')?80:100},
+    {l:'ความเงียบ', v:tags.includes('noise_high')?100:tags.includes('noise_mid')?60:30},
+    {l:'ความปลอดภัย', v:(tags.includes('sec_female')||tags.includes('sec_guard'))?100:tags.includes('sec_keycard')?70:50},
+    {l:'อาหารใกล้หอ', v:tags.includes('food_high')?100:tags.includes('food_mid')?60:25},
+    {l:'ทำเล', v:tags.includes('priority_location')?100:65},
+    {l:'สิ่งอำนวยฯ', v:Math.min((ans[8]?.length||0)*20,100)},
+  ];
+
+  document.getElementById('main').innerHTML = `
+    <div class="result">
+      <div class="result-hero">
+        <div class="icon">✨</div>
+        <h2>ผล Profile ของน้องเสร็จแล้ว!</h2>
+        <p>Budder จะใช้ข้อมูลนี้ match หอพักที่เหมาะกับน้องโดยเฉพาะ<br>ไม่ต้องอธิบายซ้ำเมื่อเริ่มแชท</p>
+      </div>
+
+      <div class="result-card">
+        <div class="result-card-title">งบประมาณ</div>
+        <div class="tag-row"><span class="tag tag-orange">${budget}</span></div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-card-title">Lifestyle Tags</div>
+        <div class="tag-row">${lifeTags.map(t=>`<span class="tag tag-orange">${t}</span>`).join('')||'<span style="font-size:13px;color:#A8A29E">ทั่วไป — ยืดหยุ่นได้</span>'}</div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-card-title">ลำดับความสำคัญในการหาหอ</div>
+        <div class="score-grid">${sc.map(s=>`
+          <div class="score-item">
+            <label>${s.l}</label>
+            <div class="score-bg"><div class="score-fill" style="width:${s.v}%"></div></div>
+          </div>`).join('')}</div>
+      </div>
+
+      <div class="cta-card">
+        <h3>ส่งผลให้ Budder แล้วคุยได้เลย!</h3>
+        <p>Budder จะช่วยแนะนำหอที่ตรงกับ Profile ของน้อง<br>คุยฟรี เหมือนมีรุ่นพี่แนะนำ</p>
+        <a class="btn-line" href="https://line.me/R/ti/p/@propertybuddy" target="_blank">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M19.365 9.89c.50 0 .906.406.906.906s-.406.906-.906.906h-2.344v1.438h2.344c.5 0 .906.406.906.906s-.406.906-.906.906h-3.25c-.5 0-.906-.406-.906-.906V8.984c0-.5.406-.906.906-.906h3.25c.5 0 .906.406.906.906s-.406.906-.906.906h-2.344V9.89h2.344zM11.184 14.056c-.203 0-.391-.078-.531-.219L7.59 10.625v3.125c0 .5-.406.906-.906.906s-.906-.406-.906-.906V8.984c0-.391.25-.734.625-.859.375-.125.781 0 1.016.313l3.062 3.218V8.984c0-.5.406-.906.906-.906s.906.406.906.906v4.766c0 .39-.25.734-.625.859-.094.031-.188.047-.297.047h.007zM5.547 14.75H4.64c-.5 0-.906-.406-.906-.906V8.984c0-.5.406-.906.906-.906s.906.406.906.906v4.86h.907c.5 0 .906.406.906.906s-.406.906-.906.906H5.547zM23 10.625C23 5.313 17.844 1 12 1S1 5.313 1 10.625c0 4.781 4.219 8.781 9.969 9.531.39.078.922.25 1.047.563.125.281.078.719.047 1.016l-.172 1c-.047.313-.25 1.219 1.078.656 1.328-.563 7.094-4.188 9.688-7.156C22.547 14.219 23 12.5 23 10.625z"/></svg>
+          คุยกับ Budder บน LINE
+        </a>
+      </div>
+
+      <button class="btn-restart" onclick="restart()">ทำแบบทดสอบใหม่</button>
+    </div>`;
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function restart() { cur=-1; ans={}; showIntro(); }
+
+showIntro();
+</script>
+</body>
+</html>
